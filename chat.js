@@ -4,7 +4,8 @@ var app = express();
 var http = require('http').Server(app); //1
 var io = require('socket.io')(http);    //1
 var id = "";
-var SEC_VALUE="김치";
+var SEC_VALUE="";
+var admin = "";
 app.get('/',function(req, res){  //2
   console.log(req.query);
   id = req.query.id;
@@ -22,6 +23,15 @@ io.on('connection', function(socket){ //3
   socket.on('disconnect', function(){ //3-2
     console.log('user disconnected: ', socket.id);
   });
+  socket.on('setans', function(value){ //3-2
+	  if(admin == ""){
+	  	admin = socket.id
+	  }
+	  console.log(admin+" / "+socket.id)
+	  console.log('setans: ',value);
+	  SEC_VALUE = value;
+
+	    });
 
   socket.on('send message', function(name,text){ //3-3
 	  if(text.substr(0,1)=='@') {
@@ -32,8 +42,10 @@ io.on('connection', function(socket){ //3
 		console.log(name + " -> " + newName);  
 	  }
 	  else{
-	    if(text ==SEC_VALUE){console.log("dss")
-	    io.emit('congrats','정답자 : '+name)
+	    if(text ==SEC_VALUE){
+		console.log("WE'VE GOT A WINNER!");
+		io.emit('congrats','정답자 : '+name+'('+ text +')');
+		socket.broadcast.emit('congrats','정답자 : '+name+'('+ text +')');
 	    }
 	    var msg = name + ' : ' + text;
 	    console.log(msg);

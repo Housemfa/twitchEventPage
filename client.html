@@ -20,6 +20,33 @@
       <input id="message" class="message" type="text">
       <input type="submit" class="chat" value="chat"/>
     </form>
+    <div>
+	    <center>
+		    <h1>정답은!</h1>
+		    <p>
+    	<h1 id='ans'>
+	</h1>
+	    </center>
+	<h3>
+		1. 최초 접속시 ID를 물어보는 프롬프트 창 출력<br>
+		2. ID입력시 채팅창 좌측에 TEXTBOX에 ID출력<br>
+		2-1. 관리자 접속시(접속 URL끝에 &auth=5xxHQ 추가) 정답 입력 프롬프트 출력<br>
+		2-2. 프롬프트에 정답 입력시 화면 하단에 마스킹 처리된 정답 출력(글자수)<br>
+		* 마스킹된 정답은 띄어쓰기는 그대로 공개<br>
+		3. 관리자가 입력한 정답 입력시 전원에게 ALERT 창 출력<br>
+		4. 관리자에게만 보이는 버튼(정답세팅) 출력예정(주말중)<br>
+		4-1. 최초에 auth 진행한 사람만 관리자가 될 예정<br>
+		
+		*일단 프로토타입만 공유해주는데 계속 본인 요청사항에 맞게 계속 추가할예정<br>
+		**글자수 팝업은 하단 마스킹 텍스트로 대체<br>
+		***그림판기능 공수 문제로 후순위(할시간이없을듯 ㅎㅎ;)<br>
+		****정답 출현시 알럿창 출력으로 대체(딩동댕은 시간나면 만져볼예정)<br>
+	</h3>
+	<h1>
+		<b>(**중요**)솔직히 너무 급하게 만들어서 어떤 버그가 있을지모름ㅋㅋㅋㅋㅋㅋㅋㅋㅋ확실하게 PLAN B 를 준비해둘것..</b>
+
+	</h3>
+    </div>
     <center>
 	    <!-- <img src = "/imgs" width="150" height="165"/>-->
 	    <!--    <b>such christmas vibes</b>-->
@@ -28,12 +55,22 @@
     <script src="/socket.io/socket.io.js"></script> <!-- 1 -->
     <script src="//code.jquery.com/jquery-1.11.1.js"></script>
     <script>
-	function getSearchParams(k){
-		 var p={};
+	var SERVER_URL_DEV = 'http://192.168.219.104:8000/?id=';
+	var SERVER_URL_PROD = 'https://twitcheventpage.herokuapp.com?id='
+	function gp(k){ var p={};
 		 location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=v})
 		 return k?p[k]:p;
 	}
-      var socket = io(); //1
+	var msk = function(strName) {
+		var originName = strName.split('');
+		originName.forEach(function(name, i) {
+		          if(name ===' ') return;
+		          originName[i] = '*';
+		        });
+	    var joinName = originName.join();
+	    return joinName.replace(/,/g, '');
+	};
+	var socket = io(); //1
       $('#chat').on('submit', function(e){ //2
         socket.emit('send message', $('#name').val(), $('#message').val());
         $('#message').val('');
@@ -48,15 +85,21 @@
         $('#name').val(name);
       });
       socket.on('congrats', function(name){ //4
-        //$('#name').val(name);
 	alert(name);
       });
 	$(document).ready(function(){
-		if(getSearchParams("id")==undefined){
+		if(gp("id")==undefined){
 		  var userId = window.prompt("ID를 입력해주세요");
 		  console.log(userId);
-		  window.location.href = 'https://twitcheventpage.herokuapp.com?id='+userId;
-		}else{
+		  window.location.href = SERVER_URL_PROD + userId;
+		}else if(gp("auth")=='5xxHQ'){
+			var auth = window.prompt("답을 입력해주세요");
+			alert(auth)
+			socket.emit('setans', auth);
+
+			$('#ans').text(msk(auth));
+		}
+		else{
 		  alert('welcome!');
 		}
 
