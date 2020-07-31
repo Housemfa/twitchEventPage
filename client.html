@@ -91,10 +91,9 @@
 		if(gp("id")==undefined){
 		  var userId = window.prompt("ID를 입력해주세요");
 		  console.log(userId);
-		  window.location.href = SERVER_URL_PROD + userId;
+		window.location.href = SERVER_URL_DEV + userId+'&auth='+gp("auth");
 		}else if(gp("auth")=='5xxHQ'){
 			var auth = window.prompt("답을 입력해주세요");
-			alert(auth)
 			socket.emit('setans', auth);
 
 			$('#ans').text(msk(auth));
