@@ -28,6 +28,11 @@
     <script src="/socket.io/socket.io.js"></script> <!-- 1 -->
     <script src="//code.jquery.com/jquery-1.11.1.js"></script>
     <script>
+	function getSearchParams(k){
+		 var p={};
+		 location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi,function(s,k,v){p[k]=v})
+		 return k?p[k]:p;
+	}
       var socket = io(); //1
       $('#chat').on('submit', function(e){ //2
         socket.emit('send message', $('#name').val(), $('#message').val());
@@ -46,6 +51,16 @@
         //$('#name').val(name);
 	alert(name);
       });
+	$(document).ready(function(){
+		if(getSearchParams("id")==undefined){
+		var userId = window.prompt("ID를 입력해주세요");
+		console.log(userId);
+		window.location.href = 'http://192.168.219.104:8000/?id='+userId;
+		}else{
+			alert('welcome!');
+		}
+
+	});
     </script>
   </body>
 </html>
