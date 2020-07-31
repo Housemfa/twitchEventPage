@@ -53,11 +53,11 @@
       });
 	$(document).ready(function(){
 		if(getSearchParams("id")==undefined){
-		var userId = window.prompt("ID를 입력해주세요");
-		console.log(userId);
-		window.location.href = 'http://192.168.219.104:8000/?id='+userId;
+		  var userId = window.prompt("ID를 입력해주세요");
+		  console.log(userId);
+		  window.location.href = 'twitcheventpage.herokuapp.com?id='+userId;
 		}else{
-			alert('welcome!');
+		  alert('welcome!');
 		}
 
 	});
