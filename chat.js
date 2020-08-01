@@ -30,7 +30,6 @@ io.on('connection', function (socket) { //3
 		console.log(admin + " / " + socket.id)
 		console.log('setans: ', value);
 		SEC_VALUE = value;
-		console.log(mValue);
 		io.emit('maskedAns', mValue);
 		socket.broadcast.emit('maskedAns', mValue);
 	});

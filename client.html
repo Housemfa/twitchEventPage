@@ -25,10 +25,6 @@
 </head>
 
 <body>
-	<ul id='task'>
-		<li>정답설정</li>
-		<li>placeholder</li>
-	</ul>
 	<div>
 		<textarea id="chatLog" class="chat_log" readonly></textarea>
 	</div>
@@ -45,7 +41,7 @@
 				</h1>
 		</center>
 		<h3>
-			0. 감기울 접속 URL : https://twitcheventpage.herokuapp.com/?id=%EA%B0%90%EA%B8%B0%EC%9A%B8&auth=5xxHQ<br>
+			0. 감기울 접속 URL : https://twitcheventpage.herokuapp.com/?id=%EA%B0%90%EA%B8%B0%EC%9A%B8&auth=5xxHQ
 			1. 최초 접속시 ID를 물어보는 프롬프트 창 출력<br>
 			2. ID입력시 채팅창 좌측에 TEXTBOX에 ID출력<br>
 			2-1. 관리자 접속시(접속 URL끝에 &auth=5xxHQ 추가) 정답 입력 프롬프트 출력<br>
@@ -73,10 +69,8 @@
 		<script src="/socket.io/socket.io.js"></script> <!-- 1 -->
 		<script src="//code.jquery.com/jquery-1.11.1.js"></script>
 		<script>
-			var isAuthenticated = false;
 			var SERVER_URL_DEV = 'http://192.168.219.104:8000/?id=';
 			var SERVER_URL_PROD = 'https://twitcheventpage.herokuapp.com?id='
-			var SERVER_URL_DETECT = location.href.substr(0,location.href.indexOf('?'))+'?id='
 			function gp(k) {
 				var p = {};
 				location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (s, k, v) { p[k] = v })
@@ -91,16 +85,6 @@
 				var joinName = originName.join();
 				return joinName.replace(/,/g, '');
 			};
-			function setAnswer(){
-				if(isAuthenticated){
-				 var auth = window.prompt("답을 입력해주세요");
-				 socket.emit('setans', auth, msk(auth));
-				}
-			}
-			function authenticate(){
-				var authPw = window.prompt("관리자비밀번호를 입력해주세요");
-				socket.emit('Admin', authPw);
-			}
 			var socket = io(); //1
 			$('#chat').on('submit', function (e) { //2
 				socket.emit('send message', $('#name').val(), $('#message').val());
@@ -118,24 +102,19 @@
 			socket.on('congrats', function (name) { //4
 				alert(name);
 			});
-                        socket.on('maskedAns', function (mValue) { //4
-				$('#ans').text(mValue);
-			});
-			$('#task').on('click', 'li', function(event) {
-				 setAnswer();
-			});
 			$(document).ready(function () {
 				if (gp("id") == undefined) {
 					var userId = window.prompt("ID를 입력해주세요");
 					console.log(userId);
-					window.location.href = SERVER_URL_DETECT + userId + '&auth=' + gp("auth");
-				} else if (gp("auth") == 'admin') {
+					window.location.href = SERVER_URL_DEV + userId + '&auth=' + gp("auth");
+				} else if (gp("auth") == '5xxHQ') {
+					var auth = window.prompt("답을 입력해주세요");
+					socket.emit('setans', auth);
 
-					isAuthenticated = true;
-					 setAnswer()
+					$('#ans').text(msk(auth));
 				}
 				else {
-					alert('Welcome!');
+					alert('welcome!');
 				}
 
 			});
