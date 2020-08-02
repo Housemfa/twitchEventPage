@@ -6,16 +6,31 @@
 	<title>빅 스트리머 감기울 이벤트 페이지</title>
 	<style>
 		.chat_log {
-			width: 95%;
+			width: 80%;
 			height: 200px;
+			margin:.5%;
 		}
-
+		div#divAdmin {
+			display: none;
+			padding: .5%;
+			margin:.5%;
+			width: 80%;
+			border: 1px solid grey
+		}
+		#adminInfo{
+			display: none;
+		}
+		#header {
+			text-align: right;
+			color:grey
+		}
 		.name {
 			width: 10%;
+			margin:.5%;
 		}
 
 		.message {
-			width: 70%;
+			width: 55%;
 		}
 
 		.chat {
@@ -25,6 +40,10 @@
 </head>
 
 <body>
+	<div id=header>by SpaceViking</div>
+	<div id=divAdmin>
+		<h3>**관리자 영역** (유저들에겐 안보여요)</h3>
+		<input type="button", id=btnInit value="문제내기"/></div>
 	<div>
 		<textarea id="chatLog" class="chat_log" readonly></textarea>
 	</div>
@@ -36,10 +55,11 @@
 	<div>
 		<center>
 			<h1>정답은!</h1>
-			<p>
 				<h1 id='ans'>
 				</h1>
+				
 		</center>
+		<div id=adminInfo>
 		<h3>
 			0. 감기울 접속 URL : https://twitcheventpage.herokuapp.com/?id=%EA%B0%90%EA%B8%B0%EC%9A%B8&auth=5xxHQ
 			1. 최초 접속시 ID를 물어보는 프롬프트 창 출력<br>
@@ -59,7 +79,8 @@
 		<h1>
 			<b>(**중요**)솔직히 너무 급하게 만들어서 어떤 버그가 있을지모름ㅋㅋㅋㅋㅋㅋㅋㅋㅋ확실하게 PLAN B 를 준비해둘것..</b>
 
-			</h3>
+		</h1>
+		</div>
 	</div>
 	<center>
 		<!-- <img src = "/imgs" width="150" height="165"/>-->
@@ -71,6 +92,9 @@
 		<script>
 			var SERVER_URL_DEV = 'http://192.168.219.104:8000/?id=';
 			var SERVER_URL_PROD = 'https://twitcheventpage.herokuapp.com?id='
+			var SERVER_URL = location.href.substr(0,location.href.indexOf('?'))+'?id='
+			var userId;
+			var auth;
 			function gp(k) {
 				var p = {};
 				location.search.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (s, k, v) { p[k] = v })
@@ -86,38 +110,53 @@
 				return joinName.replace(/,/g, '');
 			};
 			var socket = io(); //1
-			$('#chat').on('submit', function (e) { //2
+			$('#chat').on('submit', function (e) { //init
 				socket.emit('send message', $('#name').val(), $('#message').val());
 				$('#message').val('');
 				$('#message').focus();
 				e.preventDefault();
 			});
-			socket.on('receive message', function (msg) { //3
+			socket.on('receive message', function (msg) { //메세지 수신
 				$('#chatLog').append(msg + '\n');
 				$('#chatLog').scrollTop($('#chatLog')[0].scrollHeight);
 			});
-			socket.on('change name', function (name) { //4
+			socket.on('change name', function (name) { //이름변경(예정)
 				$('#name').val(name);
 			});
-			socket.on('congrats', function (name) { //4
+			socket.on('refresh', function () { //사용자 리프레시
+				window.location.href = SERVER_URL + userId + '&auth=' + auth;
+			});
+			socket.on('congrats', function (name) { //정답자 출현시
 				alert(name);
+				window.location.href = SERVER_URL + userId + '&auth=' + auth;
+			});
+			socket.on('maskedAns', function (mValue) { //관리자가 정답 세팅시
+				$('#ans').text(mValue);
 			});
 			$(document).ready(function () {
+				userId = gp("id");
+				auth =  gp("auth");
 				if (gp("id") == undefined) {
-					var userId = window.prompt("ID를 입력해주세요");
+					userId = window.prompt("ID를 입력해주세요");
 					console.log(userId);
-					window.location.href = SERVER_URL_PROD + userId + '&auth=' + gp("auth");
-				} else if (gp("auth") == '5xxHQ') {
-					var auth = window.prompt("답을 입력해주세요");
-					socket.emit('setans', auth);
+					window.location.href = SERVER_URL + userId + '&auth=' + gp("auth");
+				} else if (gp("auth") == '5xxHQ') {//관리자일때
+					answer = window.prompt("답을 입력해주세요");
+					socket.emit('setans', answer,msk(answer));
 
-					$('#ans').text(msk(auth));
+					$('#ans').text(msk(answer));
+					$("#divAdmin").show();
+					$("#adminInfo").show();
+				} else {
+					//alert('!');
 				}
-				else {
-					alert('welcome!');
-				}
-
+				$('#btnInit').click(function(){
+					socket.emit('refresh');		
+					window.location.href = SERVER_URL + userId + '&auth=' + auth;
+					
 			});
+			});
+
 		</script>
 </body>
 
